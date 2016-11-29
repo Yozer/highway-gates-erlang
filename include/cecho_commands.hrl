@@ -52,3 +52,4 @@
 -define(BOX, 35).
 -define(KEYPAD, 36).
 -define(TOUCHWIN, 37).
+-define(WBKGD, 38).
