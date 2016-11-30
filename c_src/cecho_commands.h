@@ -54,3 +54,5 @@
 #define KEYPAD 36
 #define TOUCHWIN 37
 #define WBKGD 38
+#define INIT_COLOR 39
+#define CAN_CHANGE_COLOR 40

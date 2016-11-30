@@ -96,6 +96,8 @@ void do_box(state *st);
 void do_keypad(state *st);
 void do_touchwin(state *st);
 void do_wbkgd(state *st);
+void do_init_color(state *st);
+void do_can_change_color(state *st);
 
 // =============================================================================
 // Erlang Callbacks
@@ -148,8 +150,10 @@ static ErlDrvSSizeT control(ErlDrvData drvstate, unsigned int command,
   case CURS_SET: do_curs_set(st); break;
   case WERASE: do_werase(st); break;
   case HAS_COLORS: do_has_colors(st); break;
+  case CAN_CHANGE_COLOR: do_can_change_color(st); break;
   case START_COLOR: do_start_color(st); break;
   case INIT_PAIR: do_init_pair(st); break;
+  case INIT_COLOR: do_init_color(st); break;
   case WATTRON: do_wattron(st); break;
   case WATTROFF: do_wattroff(st); break;
   case NL: do_nl(st); break;
@@ -281,6 +285,10 @@ void do_has_colors(state *st) {
   boolean(st, has_colors());
 }
 
+void do_can_change_color(state *st) {
+  boolean(st, can_change_color());
+}
+
 void do_start_color(state *st) {
   encode_ok_reply(st, start_color());
 }
@@ -292,7 +300,18 @@ void do_init_pair(state *st) {
   ei_decode_long(st->args, &(st->index), &pairnum);
   ei_decode_long(st->args, &(st->index), &fcolor);
   ei_decode_long(st->args, &(st->index), &bcolor);
-  encode_ok_reply(st, init_pair((int)pairnum, (int)fcolor, (int)bcolor));
+  encode_ok_reply(st, init_pair((short)pairnum, (short)fcolor, (short)bcolor));
+}
+
+void do_init_color(state *st) {
+  int arity;
+  long i, r, g, b;
+  ei_decode_tuple_header(st->args, &(st->index), &arity);
+  ei_decode_long(st->args, &(st->index), &i);
+  ei_decode_long(st->args, &(st->index), &r);
+  ei_decode_long(st->args, &(st->index), &g);
+  ei_decode_long(st->args, &(st->index), &b);
+  encode_ok_reply(st, init_color((short)i, (short)r, (short)g, (short)b));
 }
 
 void do_wattron(state *st) {

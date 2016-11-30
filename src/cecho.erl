@@ -34,7 +34,8 @@
 	 scrollok/2, mvaddch/3, mvaddstr/3, newwin/4, delwin/1, wmove/3,
 	 waddstr/2, waddch/2, mvwaddstr/4, mvwaddch/4, wrefresh/1, hline/2,
 	 whline/3, vline/2, wvline/3, border/8, wborder/9, box/3, getyx/1,
-	 getmaxyx/1, attron/2, attroff/2, keypad/2, getch/0, touchwin/1, wbkgd/2]).
+	 getmaxyx/1, attron/2, attroff/2, keypad/2, getch/0, touchwin/1, wbkgd/2, 
+	 init_color/4, can_change_color/0]).
 
 %% =============================================================================
 %% Application API
@@ -87,13 +88,20 @@ werase(Window) when is_integer(Window) ->
 
 has_colors() ->
     call(?HAS_COLORS).
+	
+can_change_color() ->
+    call(?CAN_CHANGE_COLOR).
 
 start_color() ->
     call(?START_COLOR).
 
-init_pair(N, FColor, BColor) when is_integer(N) andalso is_integer(FColor)
+init_pair(N, FColor, BColor) when is_integer(N) andalso is_integer(FColor) 
 				  andalso is_integer(BColor) ->
     call(?INIT_PAIR, {N, FColor, BColor}).
+	
+init_color(Index, R, G, B) when is_integer(Index) andalso is_integer(R) andalso is_integer(G)
+				  andalso is_integer(B) ->
+    call(?INIT_COLOR, {Index, R, G, B}).
 
 attron(Mask) ->
     attron(?ceSTDSCR, Mask).

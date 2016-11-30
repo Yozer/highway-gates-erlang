@@ -93,7 +93,7 @@ simple() ->
 	true ->
 	    cecho:start_color(),
 	    ok = cecho:init_pair(1, ?ceCOLOR_BLUE, ?ceCOLOR_WHITE),
-	    ok = cecho:init_pair(2, ?ceCOLOR_GREEN, ?ceCOLOR_YELLOW), 
+	    ok = cecho:init_pair(2, ?ceCOLOR_GREEN, ?ceCOLOR_YELLOW),
 	    cecho:move(9, 10),
 	    cecho:attron(?ceCOLOR_PAIR(1) bor ?ceA_BOLD bor ?ceA_UNDERLINE),
 	    cecho:addstr(" Has Colors! "),
@@ -103,7 +103,7 @@ simple() ->
 	false ->
 	    cecho:move(9, 10),
 	    cecho:addstr(" No colors :( ")
-    end,		     
+    end,
     cecho:addch($!),
     ok = cecho:refresh(),
     timer:sleep(5000),
@@ -165,7 +165,7 @@ ch_colors(MR, MC, N) ->
 
 %%
 %% Simply puts an @ character somewhere. If you go out of bounds you crash
-%% 
+%%
 pos(Y, X) ->
     application:start(cecho),
     ok = cecho:cbreak(),
@@ -176,7 +176,7 @@ pos(Y, X) ->
     timer:sleep(2000),
     application:stop(cecho).
 
-%% 
+%%
 %% Prints a number continuously as another io thread is waiting for keyinput
 %%
 input() ->
@@ -195,7 +195,7 @@ input_reader() ->
     case P of
 	$q ->
 	    application:stop(cecho);
-	?ceKEY_F(1) -> 
+	?ceKEY_F(1) ->
 	    halt();
 	_ ->
 	    cecho:mvaddstr(9, 17, io_lib:format("~p  ",[P])),
@@ -265,7 +265,7 @@ ctrl(Mover) ->
     %% get key-input
     C = cecho:getch(),
     case C of
-	$q -> 
+	$q ->
 	    %% If we get a 'q' then exit the mover and stop cecho
 	    exit(Mover, normal),
 	    application:stop(cecho),
