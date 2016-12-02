@@ -98,6 +98,14 @@ void do_touchwin(state *st);
 void do_wbkgd(state *st);
 void do_init_color(state *st);
 void do_can_change_color(state *st);
+void do_corner(state *st);
+void do_mvwhline(state *st);
+void do_mvwvline(state *st);
+void do_wnoutrefresh(state *st);
+void do_doupdate(state *st);
+void do_derwin(state *st);
+void do_assume_default_colors(state *st);
+void do_use_default_colors(state *st);
 
 // =============================================================================
 // Erlang Callbacks
@@ -176,6 +184,14 @@ static ErlDrvSSizeT control(ErlDrvData drvstate, unsigned int command,
   case KEYPAD: do_keypad(st); break;
   case TOUCHWIN: do_touchwin(st); break;
   case WBKGD: do_wbkgd(st); break;
+  case CORNER: do_corner(st); break;
+  case MVWHLINE: do_mvwhline(st); break;
+  case MVWVLINE: do_mvwvline(st); break;
+  case WNOUTREFRESH: do_wnoutrefresh(st); break;
+  case DOUPDATE: do_doupdate(st); break;
+  case DERWIN: do_derwin(st); break;
+  case USE_DEFAULT_COLORS: do_use_default_colors(st); break;
+  case ASSUME_DEFAULT: do_assume_default_colors(st); break;
   default: break;
   }
 
@@ -336,6 +352,16 @@ void do_nl(state *st) {
   encode_ok_reply(st, nl());
 }
 
+void do_assume_default_colors(state *st) {
+	long fg, bg;
+	ei_decode_long(st->args, &(st->index), &fg);
+	ei_decode_long(st->args, &(st->index), &bg);
+	encode_ok_reply(st, assume_default_colors((int)fg, (int)bg));
+}
+void do_use_default_colors(state *st) {
+	encode_ok_reply(st, use_default_colors());
+}
+
 void do_nonl(state *st) {
   encode_ok_reply(st, nonl());
 }
@@ -383,6 +409,24 @@ void do_newwin(state *st) {
     ei_decode_long(st->args, &(st->index), &starty);
     ei_decode_long(st->args, &(st->index), &startx);
     st->win[slot] = newwin(height, width, starty, startx);
+    integer(&(st->eixb), slot);
+  } else {
+    integer(&(st->eixb), -1);
+  }
+}
+
+void do_derwin(state *st) {
+  int slot = findfreewindowslot(st);
+  if (slot > 0) {
+    int arity;
+    long origin, height, width, starty, startx;
+    ei_decode_tuple_header(st->args, &(st->index), &arity);
+	ei_decode_long(st->args, &(st->index), &origin);
+    ei_decode_long(st->args, &(st->index), &height);
+    ei_decode_long(st->args, &(st->index), &width);
+    ei_decode_long(st->args, &(st->index), &starty);
+    ei_decode_long(st->args, &(st->index), &startx);
+    st->win[slot] = derwin(st->win[origin], height, width, starty, startx);
     integer(&(st->eixb), slot);
   } else {
     integer(&(st->eixb), -1);
@@ -465,6 +509,16 @@ void do_wrefresh(state *st) {
   encode_ok_reply(st, wrefresh(st->win[slot]));
 }
 
+void do_wnoutrefresh(state *st) {
+  long slot;
+  ei_decode_long(st->args, &(st->index), &slot);
+  encode_ok_reply(st, wnoutrefresh(st->win[slot]));
+}
+
+void do_doupdate(state *st) {
+  encode_ok_reply(st, doupdate());
+}
+
 void do_whline(state *st) {
   int arity;
   long slot, ch, max;
@@ -483,6 +537,30 @@ void do_wvline(state *st) {
   ei_decode_long(st->args, &(st->index), &ch);
   ei_decode_long(st->args, &(st->index), &max);
   encode_ok_reply(st, wvline(st->win[slot], (chtype)ch, (int)max));
+}
+
+void do_mvwhline(state *st) {
+  int arity;
+   long slot, ch, max, x, y;
+  ei_decode_tuple_header(st->args, &(st->index), &arity);
+  ei_decode_long(st->args, &(st->index), &slot);
+  ei_decode_long(st->args, &(st->index), &y);
+  ei_decode_long(st->args, &(st->index), &x);
+  ei_decode_long(st->args, &(st->index), &ch);
+  ei_decode_long(st->args, &(st->index), &max);
+  encode_ok_reply(st, mvwhline(st->win[slot], (int)y, (int)x, (chtype)ch, (int)max));
+}
+
+void do_mvwvline(state *st) {
+  int arity;
+  long slot, ch, max, x, y;
+  ei_decode_tuple_header(st->args, &(st->index), &arity);
+  ei_decode_long(st->args, &(st->index), &slot);
+  ei_decode_long(st->args, &(st->index), &y);
+  ei_decode_long(st->args, &(st->index), &x);
+  ei_decode_long(st->args, &(st->index), &ch);
+  ei_decode_long(st->args, &(st->index), &max);
+  encode_ok_reply(st, mvwvline(st->win[slot], (int)y, (int)x, (chtype)ch, (int)max));
 }
 
 void do_wborder(state *st) {
@@ -538,6 +616,27 @@ void do_wbkgd(state *st) {
   ei_decode_long(st->args, &(st->index), &slot);
   ei_decode_long(st->args, &(st->index), &ch);
   encode_ok_reply(st, wbkgd(st->win[slot], (chtype)ch));
+}
+
+void do_corner(state *st) {
+  int arity;
+  long slot, y, x, corner;
+  ei_decode_tuple_header(st->args, &(st->index), &arity);
+  ei_decode_long(st->args, &(st->index), &slot);
+  ei_decode_long(st->args, &(st->index), &y);
+  ei_decode_long(st->args, &(st->index), &x);
+  ei_decode_long(st->args, &(st->index), &corner);
+  
+  chtype ch;
+  if(corner == 1)
+	  ch = ACS_ULCORNER;
+  else if(corner == 2)
+	  ch = ACS_URCORNER;
+  else if(corner == 3)
+	  ch = ACS_LRCORNER;
+  else
+	  ch = ACS_LLCORNER;
+  encode_ok_reply(st, mvwaddch(st->win[slot], (int)y, (int)x, (chtype)ch));
 }
 
 // =============================================================================

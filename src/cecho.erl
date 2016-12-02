@@ -35,7 +35,8 @@
 	 waddstr/2, waddch/2, mvwaddstr/4, mvwaddch/4, wrefresh/1, hline/2,
 	 whline/3, vline/2, wvline/3, border/8, wborder/9, box/3, getyx/1,
 	 getmaxyx/1, attron/2, attroff/2, keypad/2, getch/0, touchwin/1, wbkgd/2, 
-	 init_color/4, can_change_color/0]).
+	 init_color/4, can_change_color/0, corner/4, mvwhline/5, mvwvline/5,
+	 wnoutrefresh/1, doupdate/0, derwin/5, assume_default_colors/2, use_default_colors/0]).
 
 %% =============================================================================
 %% Application API
@@ -94,6 +95,12 @@ can_change_color() ->
 
 start_color() ->
     call(?START_COLOR).
+	
+use_default_colors() ->
+    call(?USE_DEFAULT_COLORS).
+	
+assume_default_colors(FColor, BColor) ->
+    call(?ASSUME_DEFAULT, {FColor, BColor}).
 
 init_pair(N, FColor, BColor) when is_integer(N) andalso is_integer(FColor) 
 				  andalso is_integer(BColor) ->
@@ -138,6 +145,12 @@ newwin(Height, Width, StartY, StartX) when is_integer(Height) andalso
 					   is_integer(StartY) andalso
 					   is_integer(StartX) ->
     call(?NEWWIN, {Height, Width, StartY, StartX}).
+	
+derwin(Window, Height, Width, StartY, StartX) when is_integer(Height) andalso 
+				   is_integer(Width) andalso 
+				   is_integer(StartY) andalso
+				   is_integer(StartX) ->
+	call(?DERWIN, {Window, Height, Width, StartY, StartX}).
 
 delwin(Window) when is_integer(Window) ->
     call(?DELWIN, Window).
@@ -165,6 +178,12 @@ mvwaddch(Window, Y, X, Char) when is_integer(Window) andalso is_integer(Y)
 
 wrefresh(Window) when is_integer(Window) ->
     call(?WREFRESH, Window).
+	
+wnoutrefresh(Window) when is_integer(Window) ->
+    call(?WNOUTREFRESH, Window).
+	
+doupdate() ->
+    call(?DOUPDATE).
 
 hline(Char, MaxN) ->
     whline(?ceSTDSCR, Char, MaxN).
@@ -200,6 +219,16 @@ touchwin(Window) when is_integer(Window) ->
 	
 wbkgd(Window, Mask) when is_integer(Mask) andalso is_integer(Window) ->
     call(?WBKGD, {Window, Mask}).
+	
+corner(Window, Y, X, Corner) when is_integer(X) andalso is_integer(Window) ->
+    call(?CORNER, {Window, Y, X, Corner}).
+	
+mvwhline(Window, Y, X, Char, MaxN) when is_integer(Window) andalso is_integer(MaxN) ->
+    call(?MVWHLINE, {Window, Y, X, Char, MaxN}).
+
+
+mvwvline(Window, Y, X, Char, MaxN) when is_integer(Window) andalso is_integer(MaxN) ->
+    call(?MVWVLINE, {Window, Y, X, Char, MaxN}).
 
 getch() ->
     cecho_srv:getch().

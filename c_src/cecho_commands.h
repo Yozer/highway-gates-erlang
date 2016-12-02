@@ -56,3 +56,11 @@
 #define WBKGD 38
 #define INIT_COLOR 39
 #define CAN_CHANGE_COLOR 40
+#define CORNER 41
+#define MVWHLINE 42
+#define MVWVLINE 43
+#define WNOUTREFRESH 44
+#define DOUPDATE 45
+#define DERWIN 46
+#define USE_DEFAULT_COLORS 47
+#define ASSUME_DEFAULT 48
