@@ -17,7 +17,7 @@
 -define(GATE_TIMEOUT, 2000).
 -define(CARSPAWNER_TIMEOUT, 50).
 
--record(car, {pid, color, y}).
+-record(car, {speed, pid, color, y}).
 %-record(road, {window = 0, reverse = false, cars = []}).
 
 main() ->
@@ -72,7 +72,7 @@ roadProcess(Window, Cars, WinHeight) ->
       IsValidMove = validMove(Car, Cars),
       if IsValidMove ->
         CarPid = spawn_link(?MODULE, carProcess, [self(), Car, WinHeight, isReversedRoad(Window)]),
-        NewCar = #car{pid=CarPid, color=Car#car.color, y=Car#car.y},
+        NewCar = #car{pid=CarPid, y=Car#car.y},
         roadProcess(Window, [NewCar|Cars], WinHeight);
       true -> roadProcess(Window, Cars, WinHeight) end;
     {From, {move, Car}} ->
@@ -81,14 +81,14 @@ roadProcess(Window, Cars, WinHeight) ->
       IsEndOfJourney = endOfJourney(Car#car.y - 1, WinHeight),
       UpdatedCars = if IsValidMove ->
                         if IsEndOfJourney -> From ! end_journey, FilteredCars;
-                        true -> From ! ok_move, [#car{pid=From, color=Car#car.color, y=Car#car.y}|FilteredCars] end;
+                        true -> From ! ok_move, [#car{pid=From, y=Car#car.y}|FilteredCars] end;
                      true -> From ! bad_move, Cars end,
       roadProcess(Window, UpdatedCars, WinHeight);
     terminate -> ok
   end.
 
 carProcess(RoadPid, Car, WinHeight, IsReversed) ->
-  timer:sleep(crypto:rand_uniform(250, 1500)),
+  timer:sleep(Car#car.speed * 100),
   UpdatedCar = updateCar(Car),
   IsCarPassingThruGate = willCarPassThruGate(UpdatedCar, WinHeight, IsReversed),
   if IsCarPassingThruGate -> timer:sleep(?GATE_TIMEOUT); true -> ok end,
@@ -102,7 +102,7 @@ carProcess(RoadPid, Car, WinHeight, IsReversed) ->
 carSpawnerProcess(Roads) ->
   Index = crypto:rand_uniform(1, length(Roads) + 1),
   Road = lists:nth(Index,Roads),
-  Road ! {new_car, #car{pid=0,color=?RED,y=-?CAR_HEIGHT}},
+  Road ! {new_car, #car{speed=5,pid=0,color=?RED,y=-?CAR_HEIGHT}},
   timer:sleep(?CARSPAWNER_TIMEOUT),
   carSpawnerProcess(Roads).
 
@@ -112,7 +112,7 @@ createRoad(Index) ->
   cecho:newwin(MaxCol, ?ROAD_WIDTH, 0, 1 + ?ROAD_WIDTH * (Index - 1)),
   spawn_link(?MODULE, roadProcess, [Index, [], MaxCol]).
 
-updateCar(#car{y=Y,color=Color, pid=Pid}) -> #car{y=Y+1,color=Color,pid=Pid}.
+updateCar(#car{y=Y, speed=V, color=Color, pid=Pid}) -> #car{y=Y+1,speed=V,color=Color,pid=Pid}.
 
 % helpers
 isReversedRoad(Window) -> Window > (?ROAD_COUNT div 2).
