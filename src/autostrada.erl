@@ -10,6 +10,7 @@
 -define(BLACK_FG, 6).
 -define(CARCOLOR_START, 7).
 -define(CARCOLOR_END, 14).
+-define(WHITE, 15).
 
 -define(ROAD_WIDTH, 8).
 -define(CAR_HEIGHT, 4).
@@ -32,6 +33,8 @@ after
 end.
 
 drawLoop(Roads) ->
+  cecho:wbkgd(?ceSTDSCR, ?ceCOLOR_PAIR(?WHITE)),
+  cecho:wnoutrefresh(?ceSTDSCR),
   Fn  = fun(Pid) -> syncMessage(Pid, draw) end,
   lists:foreach(Fn, Roads),
   cecho:doupdate(),
@@ -55,7 +58,7 @@ init() ->
   cecho:init_pair(?ROAD_COLOR, 239, 239),
   cecho:init_pair(?ROAD_COLOR_LINE, 255, 239),
   cecho:init_pair(?BLACK_FG, 0, 239),
-  %cecho:init_pair(?RED, 88, 88),
+  cecho:init_pair(?WHITE, 255, 255),
   cecho:init_pair(?GATE_COLOR, 35, 35),
   cecho:init_pair(?CARCOLOR_START, 61, 61),
   cecho:init_pair(?CARCOLOR_START + 1, 133, 133),
