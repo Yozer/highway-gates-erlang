@@ -51,6 +51,10 @@ drawStats(Time, Roads) ->
   Fun = fun (Pid) -> Pid ! {self(), getCarCount}, receive {carCount, Count} -> Count end end,
   CarsCount = lists:sum(lists:map(Fun, Roads)),
   cecho:mvaddstr(1, 0, io_lib:format("Liczba pojazdow: ~p", [CarsCount])),
+  {Height, _} = cecho:getmaxyx(),
+  cecho:mvaddstr(Height - 3, 0, "A - spowolnij symulacje "),
+  cecho:mvaddstr(Height - 2, 0, "S - przyspiesz symulacje"),
+  cecho:mvaddstr(Height - 1, 0, "Q - wyjscie             "),
   cecho:attroff(?ceSTDSCR, ?ceCOLOR_PAIR(?FONT_COLOR)),
   cecho:wnoutrefresh(?ceSTDSCR).
 
@@ -81,7 +85,8 @@ settingsSynchronizer(TimeModifier, Time) ->
 input_reader(SettingsPid) ->
   P = cecho:getch(),
   case P of
-	   $q -> application:stop(cecho);
+	   %$q -> application:stop(cecho);
+     $q -> exit(SettingsPid, normal), application:stop(cecho), erlang:halt();
      $a -> SettingsPid ! slowDown, input_reader(SettingsPid);
      $s -> SettingsPid ! speedUp, input_reader(SettingsPid);
 	    _ -> input_reader(SettingsPid)
