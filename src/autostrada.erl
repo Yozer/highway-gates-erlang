@@ -71,7 +71,7 @@ syncMessage(Pid, Message) ->
 settingsSynchronizer(TimeModifier, Time) ->
   NewTimeModifier = receive
     slowDown -> min(2, TimeModifier + 0.05);
-    speedUp -> max(0, TimeModifier - 0.05)
+    speedUp -> max(0.05, TimeModifier - 0.05)
     after 0 -> TimeModifier
   end,
   NewTime = receive {newTime, T} -> T after 0 -> Time end,
